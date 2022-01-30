@@ -14,7 +14,7 @@ const app = {};
 
 //=>Configuration
 app.config = {
-    port: 1010
+    port: 3030
 }
 
 //=>Create Server
