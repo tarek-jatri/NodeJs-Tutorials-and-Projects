@@ -3,19 +3,22 @@
  * Description: A RESTFul API to monitor up or downtime of user defined links
  * Author: Tarek Jatri (Intern Backend NodeJs Developer)
  * Date: 30/01/2022
- *
  */
 
-//=>Dependencies
-const http = require('http');
 
-//=>App Object - Module Scaffolding
+//=>Dependencies
+// http module to create server
+const http = require('http');
+const { handleReqRes } = require('./helpers/handleReqRes')
+    //=>App Object - Module Scaffolding
 const app = {};
+
 
 //=>Configuration
 app.config = {
     port: 3030
 }
+
 
 //=>Create Server
 app.createServer = () => {
@@ -26,10 +29,7 @@ app.createServer = () => {
 };
 
 //=>handle Request Response of Server
-app.handleReqRes = (req, res) => {
-    // response handle
-    res.end('Hello Peter!!! How are you????');
-}
+app.handleReqRes = handleReqRes;
 
 // start the server
 app.createServer();
