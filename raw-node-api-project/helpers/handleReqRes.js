@@ -42,28 +42,6 @@ handler.handleReqRes = (req, res) => {
   const chosenHandler = routes[trimmedPath]
     ? routes[trimmedPath]
     : notFoundHandler;
-  /**
-   * here we are calling the handler function and sending
-   * the requestProperties and a callback as parameter.
-   * The callback function is used to get a return/response
-   * from handler function with statusCode and payload.
-   * Payload is the response data of the handler function.
-   */
-  chosenHandler(requestProperties, (statusCode, payload) => {
-    // checking if the statusCode and payload are sent properly
-    statusCode = typeof statusCode === "number" ? statusCode : 500;
-    payload = typeof payload === "object" ? payload : {};
-    // converting payload object to string for sending on the response
-    const payloadString = JSON.stringify(payload);
-    /**
-     * writing status code on the response header for a
-     * successful operation of request and response.
-     * Return the final response
-     */
-    res.writeHead(statusCode);
-    // sending the payload
-    res.end(payloadString);
-  });
 
   // reading and decoding data from request body
   const decoder = new StringDecoder("utf-8");
@@ -78,8 +56,31 @@ handler.handleReqRes = (req, res) => {
   // the 'end' event is fired when the reading ends and then we need to stop the decoder
   req.on("end", () => {
     realData += decoder.end();
-
-    console.log(realData);
+    /**
+     * here we are calling the handler function and sending
+     * the requestProperties and a callback as parameter.
+     * The callback function is used to get a return/response
+     * from handler function with statusCode and payload.
+     * Payload is the response data of the handler function.
+     * And it is written inside this 'end' event because
+     * we have to call this function after the reading is done
+     * as we may need to use the real data
+     */
+    chosenHandler(requestProperties, (statusCode, payload) => {
+      // checking if the statusCode and payload are sent properly
+      statusCode = typeof statusCode === "number" ? statusCode : 500;
+      payload = typeof payload === "object" ? payload : {};
+      // converting payload object to string for sending on the response
+      const payloadString = JSON.stringify(payload);
+      /**
+       * writing status code on the response header for a
+       * successful operation of request and response.
+       * Return the final response
+       */
+      res.writeHead(statusCode);
+      // sending the payload
+      res.end(payloadString);
+    });
     // response handling
     res.end("Hello Peter!!! How are you????");
   });
