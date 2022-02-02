@@ -5,7 +5,7 @@
  * Date: 31/01/2022
  */
 
-//=>App Object - Module Scaffolding
+//=>Module Scaffolding
 const handler = {};
 
 handler.sampleHandler = (requestProperties, callback) => {

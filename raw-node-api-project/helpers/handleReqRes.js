@@ -12,7 +12,12 @@ const url = require("url");
 const { StringDecoder } = require("string_decoder");
 // Importing the routes for function call and others
 const routes = require("../routes");
-const { notFoundHandler } = require("../routeHandlers/notFoundHandler");
+const {
+  notFoundHandler,
+} = require("../handlers/routeHandlers/notFoundHandler");
+// Importing parse JSON string to object check
+const { parseJSON } = require("./utilities");
+const { parse } = require("nodemon/lib/cli");
 
 //=>App Object - Module Scaffolding
 const handler = {};
@@ -46,6 +51,7 @@ handler.handleReqRes = (req, res) => {
   // reading and decoding data from request body
   const decoder = new StringDecoder("utf-8");
   let realData = "";
+
   // reading data from body using stream-buffer
   // and saving it on a variable
 
@@ -56,6 +62,7 @@ handler.handleReqRes = (req, res) => {
   // the 'end' event is fired when the reading ends and then we need to stop the decoder
   req.on("end", () => {
     realData += decoder.end();
+    requestProperties.body = parseJSON(realData);
     /**
      * here we are calling the handler function and sending
      * the requestProperties and a callback as parameter.
@@ -70,19 +77,25 @@ handler.handleReqRes = (req, res) => {
       // checking if the statusCode and payload are sent properly
       statusCode = typeof statusCode === "number" ? statusCode : 500;
       payload = typeof payload === "object" ? payload : {};
+
       // converting payload object to string for sending on the response
       const payloadString = JSON.stringify(payload);
+
       /**
-       * writing status code on the response header for a
-       * successful operation of request and response.
-       * Return the final response
+       * setting up the content type on header as server's response property
+       * so that the client can know about the data type of the payload
+       */
+      res.setHeader("Content-Type", "application/json");
+
+      /**
+       * writing status code on the response header for a successful operation
+       * of request and response. Return the final response
        */
       res.writeHead(statusCode);
+
       // sending the payload
       res.end(payloadString);
     });
-    // response handling
-    res.end("Hello Peter!!! How are you????");
   });
 };
 

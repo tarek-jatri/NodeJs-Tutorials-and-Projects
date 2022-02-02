@@ -22,11 +22,13 @@ const app = {};
 //     port: 3030
 // }
 
+/*
 // testing file system
 // @TODO: delete it later
 data.delete("test", "newFile", (err) => {
   console.log(err);
 });
+ */
 
 //=>Create Server
 app.createServer = () => {
