@@ -9,6 +9,8 @@
 const data = require("../../lib/data");
 const { hash } = require("../../helpers/utilities");
 const { parseJSON } = require("../../helpers/utilities");
+const { verifyToken } = require("../../handlers/routeHandlers/tokenHandler");
+const { home } = require("nodemon/lib/utils");
 
 //=>Module Scaffolding
 const handler = {};
@@ -30,7 +32,7 @@ handler._user = {};
 
 // to handle user's post actions -> CRUD - Create
 handler._user.post = (requestProperties, callback) => {
-  // verifying the credentials before inserting
+  // verifying the credentials before creating
   const firstName =
     typeof requestProperties.body.firstName === "string" &&
     requestProperties.body.firstName.trim().length > 0
@@ -100,7 +102,6 @@ handler._user.post = (requestProperties, callback) => {
 };
 
 // to handle user's get actions -> CRUD - Read
-// @TODO: Authentication
 handler._user.get = (requestProperties, callback) => {
   // check if the user's phone number is valid or not
   const phone =
@@ -110,14 +111,24 @@ handler._user.get = (requestProperties, callback) => {
       : false;
   // if valid then read and send the data to the response
   if (phone) {
-    data.read("user", phone, (err, user) => {
-      if (!err && data) {
-        const userData = parseJSON(user);
-        delete userData.password;
-        callback(200, userData);
+    const id = requestProperties.headersObject.token;
+    verifyToken(id, phone, (tokenStatus) => {
+      if (tokenStatus) {
+        // lookup for the user
+        data.read("user", phone, (err, user) => {
+          if (!err && data) {
+            const userData = parseJSON(user);
+            delete userData.password;
+            callback(200, userData);
+          } else {
+            callback(404, {
+              error: "Requested user not found!!!",
+            });
+          }
+        });
       } else {
-        callback(404, {
-          error: "Requested user not found!!!",
+        callback(403, {
+          error: "Authentication failure!!!!",
         });
       }
     });
@@ -129,7 +140,6 @@ handler._user.get = (requestProperties, callback) => {
 };
 
 // to handle user's put actions -> CRUD - Update
-// @TODO: Authentication
 handler._user.put = (requestProperties, callback) => {
   // verifying the credentials before inserting
   const firstName =
@@ -159,31 +169,40 @@ handler._user.put = (requestProperties, callback) => {
   // if valid phone is given
   if (phone) {
     if (firstName || lastName || password) {
-      //  lookup for the user
-      data.read("user", phone, (err, userData) => {
-        if (!err && userData) {
-          // changing string to JSON object
-          const user = parseJSON(userData);
-          // checking the fields and if exists then update it
-          if (firstName) user.firstName = firstName;
-          if (lastName) user.lastName = lastName;
-          if (password) user.password = hash(password);
+      const id = requestProperties.headersObject.token;
+      verifyToken(id, phone, (tokenStatus) => {
+        if (tokenStatus) {
+          //  lookup for the user
+          data.read("user", phone, (err, userData) => {
+            if (!err && userData) {
+              // changing string to JSON object
+              const user = parseJSON(userData);
+              // checking the fields and if exists then update it
+              if (firstName) user.firstName = firstName;
+              if (lastName) user.lastName = lastName;
+              if (password) user.password = hash(password);
 
-          // updating the user into database(file system)
-          data.update("user", phone, user, (err) => {
-            if (!err) {
-              callback(200, {
-                message: "User updated successfully...",
+              // updating the user into database(file system)
+              data.update("user", phone, user, (err) => {
+                if (!err) {
+                  callback(200, {
+                    message: "User updated successfully...",
+                  });
+                } else {
+                  callback(500, {
+                    error: "There is s problem on server side!!!!!",
+                  });
+                }
               });
             } else {
-              callback(500, {
-                error: "There is s problem on server side!!!!!",
+              callback(400, {
+                error: "There's a problem in request!!!",
               });
             }
           });
         } else {
-          callback(400, {
-            error: "There's a problem in request!!!",
+          callback(403, {
+            error: "Authentication failure!!!!",
           });
         }
       });
@@ -200,7 +219,6 @@ handler._user.put = (requestProperties, callback) => {
 };
 
 // to handle user's delete actions -> CRUD - Delete
-// @TODO: Authentication
 handler._user.delete = (requestProperties, callback) => {
   // check if the user's phone number is valid or not
   const phone =
@@ -209,22 +227,32 @@ handler._user.delete = (requestProperties, callback) => {
       ? requestProperties.queryStringObject.phone.trim()
       : false;
   if (phone) {
-    data.read("user", phone, (err, user) => {
-      if (!err && user) {
-        data.delete("user", phone, (err) => {
-          if (!err) {
-            callback(200, {
-              message: "User deleted successfully",
+    const id = requestProperties.headersObject.token;
+    verifyToken(id, phone, (tokenStatus) => {
+      if (tokenStatus) {
+        // lookup for the user
+        data.read("user", phone, (err, user) => {
+          if (!err && user) {
+            data.delete("user", phone, (err) => {
+              if (!err) {
+                callback(200, {
+                  message: "User deleted successfully",
+                });
+              } else {
+                callback(500, {
+                  error: "There is a problem on the server side!!!!",
+                });
+              }
             });
           } else {
-            callback(500, {
-              error: "There is a problem on the server side!!!!",
+            callback(404, {
+              error: "User not found!!!!",
             });
           }
         });
       } else {
-        callback(404, {
-          error: "User not found!!!!",
+        callback(403, {
+          error: "Authentication failure!!!!",
         });
       }
     });
