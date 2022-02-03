@@ -77,6 +77,30 @@ handler._check.post = (requestProperties, callback) => {
     data.read("tokens", tokenId, (err, strTokenData) => {
       if (!err && strTokenData) {
         const token = { ...parseJSON(strTokenData) };
+        const phone = token.phone;
+        //  lookup for the user data
+        data.read("user", phone, (err, strUserData) => {
+          if (!err && strUserData) {
+            verifyToken(tokenId, phone, (validToken) => {
+              if (validToken) {
+                const user = { ...parseJSON(strUserData) };
+                const userChecks =
+                  typeof user.checks === "object" &&
+                  user.checks instanceof Array
+                    ? user.checks
+                    : [];
+              } else {
+                callback(403, {
+                  error: "Authentication Problem!!!!",
+                });
+              }
+            });
+          } else {
+            callback(403, {
+              error: "Authentication Problem! User cannot be found....",
+            });
+          }
+        });
       } else {
         callback(403, {
           error: "Authentication Problem! Token cannot be found....",

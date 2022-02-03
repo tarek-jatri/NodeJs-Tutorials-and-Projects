@@ -1,1 +1,8 @@
-{"firstName":"Abir","lastName":"Hossain","phone":"01842626668","password":"5204d88f2635defa8b712486c7be4d313dfcd69aa19ae2f221be6772a3322956","tosAgreement":true}
+{
+  "firstName": "Abir",
+  "lastName": "Hossain",
+  "phone": "01842626668",
+  "password": "5204d88f2635defa8b712486c7be4d313dfcd69aa19ae2f221be6772a3322956",
+  "tosAgreement": true,
+  "checks" : []
+}
