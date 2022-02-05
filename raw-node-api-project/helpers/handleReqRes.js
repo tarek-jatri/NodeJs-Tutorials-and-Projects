@@ -13,11 +13,10 @@ const { StringDecoder } = require("string_decoder");
 // Importing the routes for function call and others
 const routes = require("../routes");
 const {
-  notFoundHandler,
+  notFoundHandler
 } = require("../handlers/routeHandlers/notFoundHandler");
 // Importing parse JSON string to object check
 const { parseJSON } = require("./utilities");
-const { parse } = require("nodemon/lib/cli");
 
 //=>App Object - Module Scaffolding
 const handler = {};

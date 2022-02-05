@@ -39,7 +39,7 @@ utilities.hash = (str) => {
 utilities.creatingRandomString = (strlen) => {
   const length = typeof strlen === "number" && strlen > 0 ? strlen : false;
   let output = "";
-  const possibleCharacters = "abcdefghijklmnopqrstuvwxyz123456789@$";
+  const possibleCharacters = "abcdefghijklmnopqrstuvwxyz123456789";
   for (let i = 0; i < length; i++) {
     const randomNumber = Math.floor(Math.random() * possibleCharacters.length);
     output += possibleCharacters.charAt(randomNumber);
