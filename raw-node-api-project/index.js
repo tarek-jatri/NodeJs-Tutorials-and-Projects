@@ -1,45 +1,26 @@
 /**
- * Title: Uptime Monitoring Application
- * Description: A RESTFul API to monitor up or downtime of user defined links
+ * Title: Project's Initial File
+ * Description: Initial File To Start The Node Server and Worker
  * Author: Tarek Jatri (Intern Backend NodeJs Developer)
- * Date: 30/01/2022
+ * Date: 06/02/2022
  */
 
 //=>Dependencies
-// http module to create server
-const http = require("http");
-const { handleReqRes } = require("./helpers/handleReqRes");
-// importing environment variables
-const environment = require("./helpers/environments");
-// importing the data CRUD library
-const data = require("./lib/data");
-
-const { sendTwilioSms } = require("./helpers/notifications");
+const server = require("./lib/server");
+const worker = require("./lib/worker");
 
 //=>App Object - Module Scaffolding
 const app = {};
 
-// //=>Configuration
-// app.config = {
-//     port: 3030
-// }
-
-// testing Twilio
-// @TODO: delete it later
-sendTwilioSms("01842626668", "Hello World", (err) => {
-  console.log("there is the error ", err);
-});
-
-//=>Create Server
-app.createServer = () => {
-  const server = http.createServer(app.handleReqRes);
-  server.listen(environment.port, () => {
-    console.log(`Listening to port ${environment.port}`);
-  });
+// Initializing server and worker
+app.init = () => {
+  // start the server
+  server.init();
+  // start the workers
+  worker.init();
 };
 
-//=>handle Request Response of Server
-app.handleReqRes = handleReqRes;
+app.init();
 
-// start the server
-app.createServer();
+// export the app
+module.exports = app;
