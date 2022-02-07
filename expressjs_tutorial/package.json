@@ -1,0 +1,15 @@
+{
+  "name": "expressjs_tutorial",
+  "version": "1.0.0",
+  "description": "For tutorial coding",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tarek Jatri",
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
