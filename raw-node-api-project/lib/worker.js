@@ -6,8 +6,12 @@
  */
 
 //=>Dependencies
+const url = require("url");
 const data = require("./data");
 const { parseJSON } = require("../helpers/utilities");
+const http = require("http");
+const https = require("https");
+const { sendTwilioSms } = require("../helpers/notifications");
 
 //=>worker Object - Module Scaffolding
 const worker = {};
@@ -54,9 +58,126 @@ worker.validateCheckData = (checkObject) => {
   }
 };
 
-// perform checking
+// perform checking of the given check input
 worker.performCheck = (checkObject) => {
-  //  parse the
+  // prepare the initial outcome
+  const checkOutcome = {
+    error: false,
+    value: false,
+  };
+
+  //mark the outcome has not been sent yet
+  let outcomeSent = false;
+
+  //  parse the host name and full url from the check object's data
+  const parsedUrl = url.parse(
+    `${checkObject.protocol}://${checkObject.url}`,
+    true
+  );
+  const hostname = parsedUrl.hostname;
+  const path = parsedUrl.path;
+
+  //  constructing the request
+  /*
+   * here we are constructing the object to be sent with request
+   * timeout - in ms
+   */
+  const requestDetails = {
+    protocol: `${checkObject.protocol}:`,
+    hostname,
+    method: checkObject.method,
+    path,
+    timeout: checkObject.timeoutSeconds * 1000,
+  };
+
+  const protocolToUse = checkObject.protocol === "http" ? http : https;
+
+  const req = protocolToUse.request(requestDetails, (res) => {
+    //  grab the status code
+    const status = res.statusCode;
+
+    //  update the check outcome and pass to the next process
+    if (!outcomeSent) {
+      checkOutcome.value = status;
+      worker.processCheckOutcome(checkObject, checkOutcome);
+      outcomeSent = true;
+    }
+  });
+
+  // checking if any error occurs during response
+  req.on("error", (err) => {
+    //  update the check outcome and pass to the next process
+    if (!outcomeSent) {
+      checkOutcome.error = true;
+      checkOutcome.value = err;
+      worker.processCheckOutcome(checkObject, checkOutcome);
+      outcomeSent = true;
+    }
+  });
+
+  //  checking if timeout happens
+  req.on("timeout", () => {
+    //  update the check outcome and pass to the next process
+    if (!outcomeSent) {
+      checkOutcome.error = true;
+      checkOutcome.value = "timeout";
+      worker.processCheckOutcome(checkObject, checkOutcome);
+      outcomeSent = true;
+    }
+  });
+
+  // ending the request
+  req.end();
+};
+
+// save the check outcome to the database and send to next process
+worker.processCheckOutcome = (checkObject, checkOutcome) => {
+  // check if the check outcome is up or down
+  const state =
+    !checkOutcome.error &&
+    checkOutcome.value &&
+    checkObject.successCodes.indexOf(checkOutcome.value) > -1
+      ? "up"
+      : "down";
+
+  //  decide weather to send alert or not
+
+  const alertWanted = checkObject.lastChecked && checkObject.state !== state;
+
+  checkObject.state = state;
+  checkObject.lastChecked = Date.now();
+
+  // update the check data into file system
+  data.update("checks", checkObject.id, checkObject, (err) => {
+    if (!err) {
+      if (alertWanted) {
+        //  send the check data to the next process
+        worker.alertUserToStatusChange(checkObject);
+      } else {
+        console.log("Alert not needed as there is no state change...");
+      }
+    } else {
+      console.log(
+        "Error: trying to save check data of one of the checks!!!!!!"
+      );
+    }
+  });
+};
+
+// send notification sms to user if state changed
+worker.alertUserToStatusChange = (checkObject) => {
+  //  creating the sms
+  const msg = `Alert: Your check for ${checkObject.method} ${checkObject.protocol}://${checkObject.url} is currently ${checkObject.state}`;
+  sendTwilioSms(checkObject.userPhone, msg, (err) => {
+    if (!err) {
+      console.log(`User is alerted to a status change via SMS: ${msg}`);
+    } else {
+      console.log(
+        "Error: There was a problem sending sms to one of the user!!!"
+      );
+      console.log(err);
+    }
+  });
 };
 
 // timer to execute the worker process once per minute

@@ -18,7 +18,7 @@ environments.staging = {
   twilio: {
     fromPhone: "+19088276222",
     accountSid: "AC330faa4d62529186be4e15ecef59dfda",
-    authToken: "dd9bbf0ee63389f7bc77c469dfc6bb5b",
+    authToken: "7af2d2fd02fded8cdeee50f3a39bb3d9",
   },
 };
 
@@ -30,7 +30,7 @@ environments.production = {
   twilio: {
     fromPhone: "+19088276222",
     accountSid: "AC330faa4d62529186be4e15ecef59dfda",
-    authToken: "dd9bbf0ee63389f7bc77c469dfc6bb5b",
+    authToken: "7af2d2fd02fded8cdeee50f3a39bb3d9",
   },
 };
 

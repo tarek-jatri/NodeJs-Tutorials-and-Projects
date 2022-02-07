@@ -13,7 +13,7 @@ const { StringDecoder } = require("string_decoder");
 // Importing the routes for function call and others
 const routes = require("../routes");
 const {
-  notFoundHandler
+  notFoundHandler,
 } = require("../handlers/routeHandlers/notFoundHandler");
 // Importing parse JSON string to object check
 const { parseJSON } = require("./utilities");
@@ -30,6 +30,8 @@ handler.handleReqRes = (req, res) => {
   const method = req.method.toLowerCase();
   const queryStringObject = parsedUrl.query;
   const headersObject = req.headers;
+
+  // console.log("------> Parsed URL: ", parsedUrl);
   /**
    * this requestProperties variable is used to send
    * the request properties to the handler functions
