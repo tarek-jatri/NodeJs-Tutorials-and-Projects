@@ -1,46 +1,56 @@
 const express = require("express");
 const app = express();
 
-// app.use(
-//   express.static(`${__dirname}/public/`, {
-//     index: "home.html",
-//   })
-// );
+const adminRouter = express.Router();
 
-app.set("view engine", "ejs");
+const loggerWrapper = (option) => (req, res, next) => {
+  if (option.log) {
+    console.log(
+      `${new Date(Date.now()).toLocaleString()} - ${req.method} - ${
+        req.originalUrl
+      } - ${req.protocol} - ${req.ip}`
+    );
+    next();
+  } else {
+    throw new Error("This is an error!!!");
+  }
+};
 
-app
-  .route("/about/mission")
-  .get((req, res) => {
-    res.render("pages/about");
+const logger = (req, res, next) => {
+  console.log(
+    `${new Date(Date.now()).toLocaleString()} - ${req.method} - ${
+      req.originalUrl
+    } - ${req.protocol} - ${req.ip}`
+  );
+  throw new Error("This is an error!!!");
+};
+
+adminRouter.use(
+  loggerWrapper({
+    log: false,
   })
-  .post((req, res) => {
-    res.send("Welcome to application home post");
-  })
-  .put((req, res) => {
-    res.send("Welcome to application home put");
-  });
+);
 
-/**
- * app.param()
-app.param("id", (req, res, next, id) => {
-  //  creating user
-  const user = {
-    userid: id,
-    name: "Abir Hossain",
-  };
+app.use("/admin", adminRouter);
 
-  req.user = user;
-  next();
+adminRouter.get("/dashboard", (req, res) => {
+  res.send("Admin Dashboard");
 });
 
-app.get("/user/:id", (req, res) => {
-  console.log(req.user);
-  res.send("This is home page using post");
+app.get("/about", (req, res) => {
+  res.send("About GET");
+});
+app.post("/about", (req, res) => {
+  res.send("About POST");
 });
 
- */
+const errorMiddleware = (err, req, res, next) => {
+  console.log(err.message);
+  res.status(500).send("There is a server side error!!!!");
+};
+
+adminRouter.use(errorMiddleware);
 
 app.listen(3030, () => {
-  console.log("Connection listening on 3030");
+  console.log("Listening server to 3030");
 });
