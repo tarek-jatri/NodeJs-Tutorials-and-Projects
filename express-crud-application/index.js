@@ -28,6 +28,8 @@ function errorHandler(err, req, res, next) {
   res.status(500).json({ error: err });
 }
 
+app.use(errorHandler);
+
 app.listen(3030, () => {
   console.log("CRUD app server listening to port 3030");
 });
