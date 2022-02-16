@@ -12,6 +12,25 @@ const router = express.Router();
 const User = mongoose.model("User", userSchema);
 
 //=> Routing
+// GET ALL USERS
+router.get("/all", async (req, res) => {
+  //
+  try {
+    const users = await User.find()
+      .select({
+        _id: 0,
+        __v: 0,
+      })
+      .populate("todos", "title description status -_id");
+    res.status(200).json({
+      result: users,
+    });
+  } catch {
+    res.status(500).json({
+      error: "There was a server side error",
+    });
+  }
+});
 
 // SIGNUP
 router.post("/signup", async (req, res) => {
@@ -39,13 +58,11 @@ router.post("/login", async (req, res) => {
   try {
     // check if username exists or not
     const user = await User.find({ username: req.body.username });
-    console.log(user);
     if (user && user.length > 0) {
       const isValidPassword = await bcrypt.compare(
         req.body.password,
         user[0].password
       );
-      console.log(">>>> ", isValidPassword);
       if (isValidPassword) {
         //  Generate Token
         const token = jwt.sign(

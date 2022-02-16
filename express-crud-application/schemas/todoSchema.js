@@ -15,15 +15,19 @@ const todoSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  user: {
+    type: mongoose.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 // custom instance methods
 todoSchema.methods = {
   findActive: function () {
-    return mongoose.model("TodoTable").find({ status: "active" });
+    return mongoose.model("Todo").find({ status: "active" });
   },
   findActiveCallback: function (cb) {
-    mongoose.model("TodoTable").find({ status: "active" }, cb);
+    mongoose.model("Todo").find({ status: "active" }, cb);
   },
 };
 
