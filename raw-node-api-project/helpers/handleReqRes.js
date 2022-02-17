@@ -31,7 +31,6 @@ handler.handleReqRes = (req, res) => {
   const queryStringObject = parsedUrl.query;
   const headersObject = req.headers;
 
-  // console.log("------> Parsed URL: ", parsedUrl);
   /**
    * this requestProperties variable is used to send
    * the request properties to the handler functions

@@ -11,6 +11,11 @@ const {
   errorHandler,
 } = require("./middlewares/common/errorHandler");
 
+const loginRouter = require("./router/loginRouter");
+const userRouter = require("./router/userRouter");
+const inboxRouter = require("./router/inboxRouter");
+
+//=> setting
 const app = express();
 dotenv.config();
 
@@ -36,6 +41,9 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 //=> Routing Setup
+app.use("/", loginRouter);
+app.use("/users", userRouter);
+app.use("/inbox", inboxRouter);
 
 //=> Error Handling
 // 404 Not found handler
