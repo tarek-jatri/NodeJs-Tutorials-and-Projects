@@ -2,6 +2,10 @@
   "dependencies": {
     "express": "^4.17.2",
     "mongoose": "^6.2.1",
+<<<<<<< HEAD
+=======
+    "node": "^17.4.0",
+>>>>>>> da9a1a2e1465c9446e24a896e6edc78eaf6af249
     "nodemon": "^2.0.15"
   }
 }
