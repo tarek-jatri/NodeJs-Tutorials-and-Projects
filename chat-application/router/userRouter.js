@@ -14,7 +14,13 @@ const router = express.Router();
 // users page
 router.get("/", documentHtmlResponse("User"), getUsers);
 
-// add user
+/**
+ * add user
+ *  avatarUploader - file uploader middleware
+ *  addUserValidators - array of middlewares to validate user inputs
+ *  addUserValidationHandler - error handler for the errors from validator function
+ **/
+
 router.post("/", avatarUploader, addUserValidators, addUserValidationHandler);
 
 // exporting
